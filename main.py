@@ -33,9 +33,9 @@ def file_exist(path):
 
 if __name__ == '__main__':
     #Параметры
-    host = '192.168.0.20'
-    username = 'nt_exchange'
-    private_key = 'keys/test_sftp'
+    host = 'localhost'
+    username = ''
+    private_key = ''
     private_key_pass = ''
     path_to_file = 'files/data.csv'
     path_to_prepared_file = 'prepared_files/'
@@ -63,8 +63,8 @@ if __name__ == '__main__':
 
 
             try:
-                with Sftp_Connection('192.168.0.20', username='nt_exchange', private_key='keys/test_sftp',
-                                     private_key_pass='9R1mapkl!@#') as sftp:
+                with Sftp_Connection(host, username=username, private_key=private_key,
+                                     private_key_pass=private_key_pass) as sftp:
                     # Лист директорий
                     l = sftp.listdir()
                     print(l)
