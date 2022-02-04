@@ -32,12 +32,15 @@ def file_exist(path):
 
 
 if __name__ == '__main__':
+   # paramiko.hostkeys.HostKeys('files/known_hosts')
+    #paramiko.hostkeys.HostKeys.load(filename='keys/known_hosts')
     #Параметры
-    host = 'localhost'
-    username = ''
-    private_key = ''
-    private_key_pass = ''
-    key_data = """AAAAB3NzaC1yc2EAAAABIwAAAgEAzG68bROjTKziJkhxhFBwx4TOzb9oA9FvjalKXlYEqwgL4eHvpunaCMU7NKCSQXS5o/cBTDN5e+IBgkQhjAFsE/xliVl9q2HhT1ZV10gi2i0VbH4Qrp1bXLg0tpRv6CCDh6pz+te5lT881o07x47vkhtOPZVbDjuztCc9168F2CmKlriEH9ZhqTRWBtxaSC6t7ytTvNcvlUOGpJ0IGoAJggW9iY09AhdzU4Gt5FNMSPUkLf+DSwetxYJI5Tv3H63zUxYU1rhAkf374PbpiKc3hQiq/D3jtW7DEenqOHUPQUfCSXIadnQ87iKvaJ82/9tLyBCKHr9gReEPCc58c+pGklL8FZPbZfvxH+miOQTsXomjqdd4dhDiAERDS4srUPrD1F0GvfTU9rjpnhf3EmSjfAtLCRCJUMzpefn8Hl38ZYc/BlOY61Lz95XS0qx43yfO600rF1+iA0G5ve3PU//L9paTYe3sbb+wSzlIW36kq3OqzHPeZ7M9Z4a3OS/TfpM5CcnqZFSgbORKHt3n+6ukyubzJOGeELwMLgzUC+UnbrwuHecrWjmV3Z2O2jzwOZ1gO2RTt41JDMqaRPnmM+WeERKUYs3Op+8fkwcSPDVu9tEMWESbHyyWzoztPgTCHSvhA5XvbniLL0rDJNpIjSKYcBOmbJMi4M378Zk+b73fc7k="""
+    host = 'gbd.ftc.ru'
+    port = 11222
+    username = 'cifrograd'
+    private_key = 'keys/id_rsa'
+    private_key_pass = 'f1n8sbOW6C38'
+    key_data = b"""AAAAB3NzaC1yc2EAAAABIwAAAgEAzG68bROjTKziJkhxhFBwx4TOzb9oA9FvjalKXlYEqwgL4eHvpunaCMU7NKCSQXS5o/cBTDN5e+IBgkQhjAFsE/xliVl9q2HhT1ZV10gi2i0VbH4Qrp1bXLg0tpRv6CCDh6pz+te5lT881o07x47vkhtOPZVbDjuztCc9168F2CmKlriEH9ZhqTRWBtxaSC6t7ytTvNcvlUOGpJ0IGoAJggW9iY09AhdzU4Gt5FNMSPUkLf+DSwetxYJI5Tv3H63zUxYU1rhAkf374PbpiKc3hQiq/D3jtW7DEenqOHUPQUfCSXIadnQ87iKvaJ82/9tLyBCKHr9gReEPCc58c+pGklL8FZPbZfvxH+miOQTsXomjqdd4dhDiAERDS4srUPrD1F0GvfTU9rjpnhf3EmSjfAtLCRCJUMzpefn8Hl38ZYc/BlOY61Lz95XS0qx43yfO600rF1+iA0G5ve3PU//L9paTYe3sbb+wSzlIW36kq3OqzHPeZ7M9Z4a3OS/TfpM5CcnqZFSgbORKHt3n+6ukyubzJOGeELwMLgzUC+UnbrwuHecrWjmV3Z2O2jzwOZ1gO2RTt41JDMqaRPnmM+WeERKUYs3Op+8fkwcSPDVu9tEMWESbHyyWzoztPgTCHSvhA5XvbniLL0rDJNpIjSKYcBOmbJMi4M378Zk+b73fc7k="""
     key = paramiko.RSAKey(data=decodebytes(key_data))
     path_to_file = 'files/data.csv'
     path_to_prepared_file = 'prepared_files/'
@@ -49,7 +52,7 @@ if __name__ == '__main__':
     path_to_download = 'out/gds-ctl_mbm_catalog/' # Возможно потом понадобится загружать ответы от удаленного сервера
     cnopts = pysftp.CnOpts()
     cnopts.hostkeys.add(host, 'ssh-rsa', key)
-    #Цикл:
+
     while True:
         #Проверка наличия файла
         if file_exist(path_to_file) == True:
@@ -63,18 +66,16 @@ if __name__ == '__main__':
 
 
             # Коннект к серверу по ключу
-
-
             try:
-                with Sftp_Connection(host, username=username, private_key=private_key,
-                                     private_key_pass=private_key_pass) as sftp:
+                with Sftp_Connection(host, username=username, private_key=private_key, port=port,
+                                     private_key_pass=private_key_pass, cnopts=cnopts) as sftp:
                     # Лист директорий
                     l = sftp.listdir()
                     print(l)
                     # Передача файла из prepared_files
                     sftp.put(path_to_prepared_file + newFilename, path_to_upload + newFilenameOnServer)
                     # Отключение от сервера
-                    print("Файл отправлен, отключение от сервера")
+                    print("Файл отправлен: "+ path_to_upload + newFilenameOnServer + ", отключение от сервера")
                     sftp.__del__()
                     print("Удаление старого файла: " + path_to_file)
                     os.remove(path_to_file)
